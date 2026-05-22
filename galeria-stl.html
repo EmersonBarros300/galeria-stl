@@ -173,6 +173,16 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;bac
 </div>
 
 <div class="toast" id="toast"></div>
+<div id="drive-menu" style="display:none;position:fixed;top:62px;right:24px;z-index:150;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:8px;min-width:220px;box-shadow:0 8px 24px rgba(0,0,0,0.4)">
+  <button onclick="openPicker();document.getElementById('drive-menu').style.display='none'" style="width:100%;padding:9px 12px;background:transparent;border:none;color:var(--text);font-size:13px;text-align:left;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:8px" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12V5a1 1 0 011-1h3l2 2h5a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1z"/></svg>
+    Selecionar pasta ou arquivo
+  </button>
+  <button onclick="buscarTodosDrive()" style="width:100%;padding:9px 12px;background:transparent;border:none;color:var(--text);font-size:13px;text-align:left;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:8px" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="4"/><path d="M10.5 10.5L14 14"/></svg>
+    Buscar todos os STLs no Drive
+  </button>
+</div>
 
 <header>
   <div class="logo">
@@ -191,13 +201,17 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;bac
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12V5a1 1 0 011-1h3l2 2h5a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1z"/></svg>
       Pasta local
     </button>
-    <button class="btn-drive" id="drive-btn" onclick="handleDriveBtn()">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.28 3l5.72 9.9L6.28 3zM0 18l3.14-5.43L6.28 18H0zm22.86 0H16l3.14-5.43L22.86 18zM8.57 3h6.86L24 18H0L8.57 3z" opacity=".3"/><path d="M12 12.9L6.28 3H3.14L12 18.9l8.86-15.9h-3.14L12 12.9z"/></svg>
+    <button class="btn-drive" id="drive-btn" onclick="abrirModalDrive()">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12.9L6.28 3H3.14L12 18.9l8.86-15.9h-3.14L12 12.9z"/></svg>
       Google Drive
     </button>
     <button class="btn-primary" onclick="document.getElementById('file-input').click()">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 10V3M5 6l3-3 3 3M3 12h10"/></svg>
       Adicionar STLs
+    </button>
+    <button class="btn-ghost" id="home-btn" onclick="voltarInicio()" style="display:none">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6.5L8 2l6 4.5V14a1 1 0 01-1 1H3a1 1 0 01-1-1V6.5z"/><path d="M6 15V9h4v6"/></svg>
+      Início
     </button>
   </div>
 </header>
@@ -228,7 +242,7 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;bac
     <div class="empty-title">Nenhum modelo carregado</div>
     <div class="empty-sub">Abra uma pasta do Google Drive, selecione arquivos locais ou arraste STLs para cá</div>
     <div class="btn-row">
-      <button class="btn-drive" onclick="handleDriveBtn()">
+      <button class="btn-drive" onclick="abrirModalDrive()">
         <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 12.9L6.28 3H3.14L12 18.9l8.86-15.9h-3.14L12 12.9z"/></svg>
         Abrir do Google Drive
       </button>
@@ -244,6 +258,34 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;bac
   </div>
   <div class="grid" id="grid" style="display:none"></div>
   <div class="no-results" id="no-results" style="display:none">Nenhum modelo encontrado.</div>
+</div>
+
+<!-- Drive Link Modal -->
+<div class="overlay" id="drive-overlay" style="z-index:250">
+  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:16px;width:100%;max-width:500px;padding:28px;transform:scale(.95);transition:transform .2s" id="drive-modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div style="font-size:16px;font-weight:700">Abrir pasta do Google Drive</div>
+      <button onclick="fecharModalDrive()" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;width:28px;height:28px;display:flex;align-items:center;justify-content:center">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 1l12 12M13 1L1 13"/></svg>
+      </button>
+    </div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6">
+      Cole o link de uma pasta do Google Drive abaixo. A pasta precisa estar compartilhada como <strong style="color:var(--text)">"Qualquer pessoa com o link pode ver"</strong>.
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Como compartilhar a pasta:</div>
+    <div style="font-size:12px;color:var(--muted2);margin-bottom:16px;line-height:1.7;background:var(--surface2);padding:10px 12px;border-radius:8px">
+      1. No Google Drive, clique com botão direito na pasta<br>
+      2. Clique em <strong style="color:var(--text)">"Compartilhar"</strong><br>
+      3. Mude para <strong style="color:var(--text)">"Qualquer pessoa com o link"</strong><br>
+      4. Copie o link e cole aqui
+    </div>
+    <input type="text" id="drive-link-input" class="edit-input" placeholder="https://drive.google.com/drive/folders/..." style="margin-bottom:12px;font-size:13px">
+    <div id="drive-link-error" style="font-size:12px;color:var(--bad);margin-bottom:10px;display:none">Link inválido. Use um link de pasta do Google Drive.</div>
+    <button onclick="carregarPastaDrive()" class="btn-primary" style="width:100%;justify-content:center">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 10V3M5 6l3-3 3 3M3 12h10"/></svg>
+      Carregar STLs da pasta
+    </button>
+  </div>
 </div>
 
 <!-- Modal -->
@@ -365,16 +407,7 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;bac
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 // ─── Config ──────────────────────────────────────────────────────────────────
-const CLIENT_ID = '387408419011-scgm9nii6fr4t3ddmautq5a253l3a13j.apps.googleusercontent.com';
-const API_KEY   = 'AIzaSyClX4FknVIejCvYQXtFHKQ4ty0UShuuXsc';
-const SCOPES    = 'https://www.googleapis.com/auth/drive.readonly';
-
-// ─── Google Auth ──────────────────────────────────────────────────────────────
-let tokenClient = null;
-let accessToken  = null;
-let gapiReady    = false;
-let gisReady     = false;
-let pickerReady  = false;
+const API_KEY = 'AIzaSyClX4FknVIejCvYQXtFHKQ4ty0UShuuXsc';
 
 function toast(msg, ms=3000){
   const t=document.getElementById('toast');
@@ -382,104 +415,67 @@ function toast(msg, ms=3000){
   setTimeout(()=>t.classList.remove('show'), ms);
 }
 
-function loadGoogleScripts(){
-  // GAPI (Picker)
-  const s1=document.createElement('script');
-  s1.src='https://apis.google.com/js/api.js';
-  s1.onload=()=>{
-    gapi.load('picker', ()=>{ pickerReady=true; });
-    gapiReady=true;
-  };
-  document.head.appendChild(s1);
-  // GIS (token)
-  const s2=document.createElement('script');
-  s2.src='https://accounts.google.com/gsi/client';
-  s2.onload=()=>{
-    tokenClient=google.accounts.oauth2.initTokenClient({
-      client_id: CLIENT_ID,
-      scope: SCOPES,
-      callback: (resp)=>{
-        if(resp.error){ toast('❌ Erro ao autenticar: '+resp.error); return; }
-        accessToken=resp.access_token;
-        document.getElementById('drive-btn').classList.add('connected');
-        document.getElementById('drive-btn').innerHTML=`
-          <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 12.9L6.28 3H3.14L12 18.9l8.86-15.9h-3.14L12 12.9z"/></svg>
-          Drive conectado`;
-        toast('✓ Google Drive conectado!');
-        openPicker();
-      }
-    });
-    gisReady=true;
-  };
-  document.head.appendChild(s2);
+function abrirModalDrive(){
+  document.getElementById('drive-overlay').classList.add('open');
+  document.getElementById('drive-modal-box').style.transform='scale(1)';
 }
-loadGoogleScripts();
 
-function handleDriveBtn(){
-  if(!gisReady){ toast('Aguarde, carregando Google...'); return; }
-  if(!accessToken){
-    tokenClient.requestAccessToken({prompt:'consent'});
-  } else {
-    openPicker();
+function fecharModalDrive(){
+  document.getElementById('drive-overlay').classList.remove('open');
+  document.getElementById('drive-link-input').value='';
+  document.getElementById('drive-link-error').style.display='none';
+}
+
+function extrairFolderId(link){
+  // Formatos: /folders/ID, ?id=ID
+  const m1 = link.match(/\/folders\/([a-zA-Z0-9_-]+)/);
+  if(m1) return m1[1];
+  const m2 = link.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if(m2) return m2[1];
+  return null;
+}
+
+async function carregarPastaDrive(){
+  const link = document.getElementById('drive-link-input').value.trim();
+  const folderId = extrairFolderId(link);
+  if(!folderId){
+    document.getElementById('drive-link-error').style.display='block';
+    return;
   }
-}
-
-function openPicker(){
-  if(!pickerReady){ toast('Aguarde, carregando Picker...'); return; }
-  const view = new google.picker.DocsView()
-    .setIncludeFolders(true)
-    .setSelectFolderEnabled(true)
-    .setMimeTypes('application/octet-stream,application/sla,model/stl,model/x.stl-binary,model/x.stl-ascii,.stl')
-    .setQuery('.stl');
-
-  const picker = new google.picker.PickerBuilder()
-    .setAppId('387408419011')
-    .setOAuthToken(accessToken)
-    .setDeveloperKey(API_KEY)
-    .setTitle('Selecione arquivos ou pasta STL')
-    .addView(view)
-    .addView(new google.picker.DocsView()
-      .setIncludeFolders(true)
-      .setSelectFolderEnabled(true)
-      .setMimeTypes('application/vnd.google-apps.folder'))
-    .setCallback(pickerCallback)
-    .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
-    .build();
-  picker.setVisible(true);
-}
-
-async function pickerCallback(data){
-  if(data.action !== google.picker.Action.PICKED) return;
-  const docs = data[google.picker.Response.DOCUMENTS];
-  const stlFiles = [];
-  for(const doc of docs){
-    const mime = doc[google.picker.Document.MIME_TYPE]||'';
-    if(mime === 'application/vnd.google-apps.folder'){
-      toast('📂 Buscando STLs na pasta...');
-      const files = await listFolderSTLs(doc[google.picker.Document.ID]);
-      stlFiles.push(...files);
-    } else if(doc[google.picker.Document.NAME].toLowerCase().endsWith('.stl')){
-      stlFiles.push({id: doc[google.picker.Document.ID], name: doc[google.picker.Document.NAME], size: doc[google.picker.Document.SIZE_BYTES]||0});
-    }
+  document.getElementById('drive-link-error').style.display='none';
+  fecharModalDrive();
+  toast('📂 Buscando STLs na pasta...');
+  try{
+    const files = await listFolderSTLs(folderId);
+    if(!files.length){ toast('Nenhum arquivo STL encontrado na pasta.'); return; }
+    toast(`Encontrado ${files.length} arquivo(s) STL!`);
+    await loadDriveFiles(files);
+  }catch(e){
+    toast('Erro: verifique se a pasta está compartilhada publicamente.');
+    console.error(e);
   }
-  if(!stlFiles.length){ toast('Nenhum arquivo STL encontrado.'); return; }
-  toast(`Carregando ${stlFiles.length} arquivo(s) do Drive...`);
-  await loadDriveFiles(stlFiles);
 }
 
 async function listFolderSTLs(folderId){
   const files=[];
-  let pageToken='';
-  do{
-    const q=encodeURIComponent(`'${folderId}' in parents and trashed=false`);
-    const url=`https://www.googleapis.com/drive/v3/files?q=${q}&fields=nextPageToken,files(id,name,size,mimeType)&pageSize=200${pageToken?'&pageToken='+pageToken:''}`;
-    const r=await fetch(url,{headers:{Authorization:'Bearer '+accessToken}});
-    const d=await r.json();
-    for(const f of (d.files||[])){
-      if(f.name.toLowerCase().endsWith('.stl')) files.push({id:f.id,name:f.name,size:+f.size||0});
-    }
-    pageToken=d.nextPageToken||'';
-  }while(pageToken);
+  try{
+    let pageToken='';
+    do{
+      const q=encodeURIComponent(`'${folderId}' in parents and trashed=false`);
+      const url=`https://www.googleapis.com/drive/v3/files?q=${q}&fields=nextPageToken,files(id,name,size,mimeType)&pageSize=200&key=${API_KEY}${pageToken?'&pageToken='+pageToken:''}`;
+      const r=await fetch(url);
+      const d=await r.json();
+      if(d.error){ throw new Error(d.error.message); }
+      for(const f of (d.files||[])){
+        if(f.name.toLowerCase().endsWith('.stl')) files.push({id:f.id,name:f.name,size:+f.size||0});
+        if(f.mimeType==='application/vnd.google-apps.folder'){
+          const sub=await listFolderSTLs(f.id);
+          files.push(...sub);
+        }
+      }
+      pageToken=d.nextPageToken||'';
+    }while(pageToken);
+  }catch(e){ console.warn('Erro na pasta',folderId,e); }
   return files;
 }
 
@@ -494,8 +490,9 @@ async function loadDriveFiles(driveFiles){
     pl.textContent=`Baixando ${i+1}/${driveFiles.length}: ${df.name}`;
     pf.style.width=((i+1)/driveFiles.length*100)+'%';
     try{
-      const url=`https://www.googleapis.com/drive/v3/files/${df.id}?alt=media`;
-      const resp=await fetch(url,{headers:{Authorization:'Bearer '+accessToken}});
+      const url=`https://www.googleapis.com/drive/v3/files/${df.id}?alt=media&key=${API_KEY}`;
+      const resp=await fetch(url);
+      if(!resp.ok){ console.warn('Erro ao baixar',df.name,resp.status); continue; }
       const buf=await resp.arrayBuffer();
       const fakeFile={name:df.name,size:df.size||buf.byteLength};
       const m=await processFileBuffer(buf,fakeFile,true);
@@ -651,6 +648,7 @@ async function loadFiles(files){
   }
   document.getElementById('prog-wrap').style.display='none';
   applyAndRender();
+  if(models.length>0) document.getElementById('home-btn').style.display='flex';
 }
 
 function applyAndRender(){
@@ -808,6 +806,18 @@ document.addEventListener('drop',e=>{e.preventDefault();dragCount=0;document.get
 document.getElementById('search').addEventListener('input',function(){searchVal=this.value;applyAndRender();});
 document.querySelectorAll('.chip').forEach(c=>{c.addEventListener('click',function(){document.querySelectorAll('.chip').forEach(ch=>ch.classList.remove('active'));this.classList.add('active');activeFilter=this.dataset.filter;applyAndRender();});});
 document.getElementById('sort-sel').addEventListener('change',function(){sortVal=this.value;applyAndRender();});
+function voltarInicio(){
+  if(confirm('Voltar ao início? Os modelos carregados serão removidos.')) {
+    models.length=0;
+    filteredModels.length=0;
+    document.getElementById('grid').style.display='none';
+    document.getElementById('empty-state').style.display='flex';
+    document.getElementById('no-results').style.display='none';
+    document.getElementById('total-count').textContent='0 modelos';
+    document.getElementById('home-btn').style.display='none';
+    closeModal();
+  }
+}
 window.addEventListener('resize',()=>{if(mR&&document.getElementById('overlay').classList.contains('open'))resizeModal();});
 </script>
 </body>
