@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galeria STL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0c0c0f;--surface:#13131a;--surface2:#1c1c26;--surface3:#242432;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.11);
+  --accent:#7c6cfc;--accent-glow:rgba(124,108,252,0.2);--accent2:#a594fd;
+  --text:#eeedf5;--muted:#7a798a;--muted2:#4a4958;
+  --ok:#4ade80;--ok-bg:rgba(74,222,128,0.1);
+  --warn:#fbbf24;--warn-bg:rgba(251,191,36,0.1);
+  --bad:#f87171;--bad-bg:rgba(248,113,113,0.1);
+  --card-h:200px;
+}
+*{font-family:'Outfit',sans-serif}
+body{background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+header{position:sticky;top:0;z-index:100;background:rgba(12,12,15,0.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;}
+.logo{display:flex;align-items:center;gap:9px}
+.logo-mark{width:30px;height:30px;border-radius:7px;background:var(--accent);display:flex;align-items:center;justify-content:center}
+.logo-mark svg{width:17px;height:17px}
+.logo-name{font-size:15px;font-weight:700;letter-spacing:-.01em}
+.logo-count{font-size:11px;font-family:'DM Mono',monospace;background:var(--surface2);border:1px solid var(--border2);border-radius:20px;padding:2px 9px;color:var(--muted);margin-left:4px}
+.hright{display:flex;align-items:center;gap:8px}
+
+.btn-primary{display:flex;align-items:center;gap:7px;padding:7px 16px;border-radius:8px;background:var(--accent);border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s,transform .1s}
+.btn-primary:hover{opacity:.88}.btn-primary:active{transform:scale(.97)}
+.btn-primary svg{width:14px;height:14px;flex-shrink:0}
+.btn-ghost{display:flex;align-items:center;gap:6px;padding:6px 13px;border-radius:8px;background:transparent;border:1px solid var(--border2);color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;transition:border-color .15s,color .15s}
+.btn-ghost:hover{color:var(--text)}
+.btn-ghost svg{width:13px;height:13px}
+.btn-drive{display:flex;align-items:center;gap:7px;padding:7px 16px;border-radius:8px;background:#1a73e8;border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s,transform .1s}
+.btn-drive:hover{opacity:.88}.btn-drive:active{transform:scale(.97)}
+.btn-drive svg{width:14px;height:14px;flex-shrink:0}
+.btn-drive.connected{background:#0f5132}
+
+.search-wrap{position:relative}
+.search-wrap svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--muted);pointer-events:none}
+.search-input{padding:6px 11px 6px 30px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;width:190px;outline:none;transition:border-color .15s,width .2s}
+.search-input:focus{border-color:var(--accent);width:230px}
+.search-input::placeholder{color:var(--muted2)}
+
+.toolbar{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-bottom:1px solid var(--border);gap:10px;flex-wrap:wrap}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.chip{padding:4px 11px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap}
+.chip:hover{border-color:var(--border2);color:var(--text)}
+.chip.active{background:var(--accent-glow);border-color:var(--accent);color:var(--accent2)}
+.chip.ok.active{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.chip.warn.active{background:var(--warn-bg);border-color:var(--warn);color:var(--warn)}
+.chip.bad.active{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+.sort-sel{background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--muted);font-size:12px;padding:5px 9px;outline:none;cursor:pointer}
+
+.main{padding:20px 24px;max-width:1600px;margin:0 auto}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:380px;gap:16px;text-align:center}
+.empty-icon{width:72px;height:72px;border-radius:18px;border:1.5px dashed var(--muted2);display:flex;align-items:center;justify-content:center}
+.empty-icon svg{width:32px;height:32px;color:var(--muted2)}
+.empty-title{font-size:19px;font-weight:600}
+.empty-sub{font-size:13px;color:var(--muted);max-width:320px;line-height:1.6}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.prog-bar{width:280px;height:2px;background:var(--surface3);border-radius:1px;overflow:hidden;margin-top:4px}
+.prog-fill{height:100%;background:var(--accent);width:0%;transition:width .2s}
+.prog-label{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:5px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.no-results{text-align:center;padding:60px;color:var(--muted);font-size:14px}
+
+.lic-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;font-family:'DM Mono',monospace}
+.lic-ok{background:var(--ok-bg);color:var(--ok)}
+.lic-warn{background:var(--warn-bg);color:var(--warn)}
+.lic-bad{background:var(--bad-bg);color:var(--bad)}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:13px;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .2s,box-shadow .2s;position:relative}
+.card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,0.4)}
+.card.selected{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 8px 28px var(--accent-glow)}
+.card-thumb{width:100%;height:var(--card-h);background:var(--surface2);position:relative;overflow:hidden}
+.card-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.card-fmt{position:absolute;top:7px;left:7px;font-size:10px;font-family:'DM Mono',monospace;padding:2px 6px;border-radius:4px;background:rgba(12,12,15,0.75);color:var(--muted);border:1px solid var(--border)}
+.card-src{position:absolute;bottom:7px;left:7px;font-size:10px;font-family:'DM Mono',monospace;padding:2px 6px;border-radius:4px;background:rgba(26,115,232,0.85);color:#fff}
+.card-lic{position:absolute;top:7px;right:7px}
+.card-body{padding:11px 13px 13px}
+.card-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:5px}
+.card-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:5px}
+.card-platform{font-size:11px;color:var(--muted2)}
+
+/* Drive status toast */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:10px 18px;font-size:13px;color:var(--text);z-index:500;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+
+/* Modal */
+.overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:18px;width:100%;max-width:1020px;max-height:92vh;display:flex;overflow:hidden;transform:scale(.95) translateY(8px);transition:transform .2s}
+.overlay.open .modal{transform:scale(1) translateY(0)}
+.modal-left{flex:1;min-height:440px;background:var(--bg);position:relative;cursor:grab;display:flex;flex-direction:column}
+.modal-left:active{cursor:grabbing}
+.modal-left canvas{display:block;width:100%!important;flex:1}
+.modal-hint{padding:8px 14px;font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;text-align:center;border-top:1px solid var(--border);flex-shrink:0}
+.modal-right{width:280px;flex-shrink:0;border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+
+.mhead{padding:14px 14px 12px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-shrink:0}
+.mtitle{font-size:13px;font-weight:600;word-break:break-all;line-height:1.4}
+.close-btn{width:26px;height:26px;border-radius:6px;flex-shrink:0;background:var(--surface2);border:1px solid var(--border);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .15s}
+.close-btn:hover{color:var(--text)}
+.close-btn svg{width:13px;height:13px}
+
+.msec{padding:12px 14px;border-bottom:1px solid var(--border)}
+.msec-title{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:9px;font-family:'DM Mono',monospace}
+.mrow{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.mrow:last-child{margin-bottom:0}
+.mlabel{font-size:12px;color:var(--muted)}
+.mval{font-size:12px;font-family:'DM Mono',monospace;color:var(--text);text-align:right;max-width:160px;word-break:break-all}
+.mlink{font-size:11px;color:#60a5fa;text-decoration:none;word-break:break-all}
+.mlink:hover{text-decoration:underline}
+
+.edit-field{margin-bottom:9px}
+.edit-label{font-size:11px;color:var(--muted);margin-bottom:4px}
+.edit-input{width:100%;padding:5px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;outline:none;transition:border-color .15s}
+.edit-input:focus{border-color:var(--accent)}
+.edit-input::placeholder{color:var(--muted2)}
+select.edit-input{cursor:pointer}
+
+.ctrl{margin-bottom:9px}
+.ctrl-label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:5px}
+.ctrl-label span{font-family:'DM Mono',monospace;color:var(--text)}
+input[type=range]{width:100%;height:3px;background:var(--surface3);border-radius:2px;outline:none;border:none;appearance:none;-webkit-appearance:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--accent);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:var(--accent);border:none;cursor:pointer}
+.swatch-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}
+.swatch{width:21px;height:21px;border-radius:4px;cursor:pointer;border:2px solid transparent;transition:border-color .15s,transform .1s;flex-shrink:0}
+.swatch:hover{transform:scale(1.15)}
+.swatch.on{border-color:var(--accent)}
+.vbtns{display:flex;gap:5px;flex-wrap:wrap}
+.vbtn{padding:5px 9px;border-radius:5px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:11px;font-weight:500;cursor:pointer;transition:all .15s}
+.vbtn:hover{color:var(--text)}
+.vbtn.on{background:var(--accent-glow);border-color:var(--accent);color:var(--accent2)}
+.tog-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.tog-label{font-size:12px;color:var(--muted)}
+.tog{position:relative;width:32px;height:18px;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0;position:absolute}
+.tog-track{position:absolute;inset:0;border-radius:9px;background:var(--surface3);border:1px solid var(--border2);cursor:pointer;transition:background .2s}
+.tog input:checked~.tog-track{background:var(--accent)}
+.tog-thumb{position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--muted);transition:transform .2s,background .2s;pointer-events:none}
+.tog input:checked~.tog-thumb{transform:translateX(14px);background:#fff}
+.nav-btns{display:flex;gap:8px;padding:12px 14px}
+.nav-btn{flex:1;padding:7px;border-radius:7px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px}
+.nav-btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent2)}
+.nav-btn:disabled{opacity:.3;cursor:default}
+
+.drag-full{position:fixed;inset:0;z-index:300;background:rgba(124,108,252,0.07);border:2px dashed var(--accent);display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity .15s}
+.drag-full.show{opacity:1}
+.drag-full-inner{text-align:center}
+.drag-full-inner svg{width:44px;height:44px;color:var(--accent);margin-bottom:10px}
+.drag-full-inner p{font-size:18px;font-weight:700;color:var(--accent2)}
+.drag-full-inner small{font-size:13px;color:var(--muted)}
+
+#file-input,#folder-input{display:none}
+</style>
+</head>
+<body>
+
+<div class="drag-full" id="drag-full">
+  <div class="drag-full-inner">
+    <svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 28V16M15 22l7-7 7 7"/><rect x="5" y="5" width="34" height="34" rx="5"/></svg>
+    <p>Solte os arquivos STL aqui</p>
+    <small>Vários arquivos suportados</small>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="drive-menu" style="display:none;position:fixed;top:62px;right:24px;z-index:150;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:8px;min-width:220px;box-shadow:0 8px 24px rgba(0,0,0,0.4)">
+  <button onclick="openPicker();document.getElementById('drive-menu').style.display='none'" style="width:100%;padding:9px 12px;background:transparent;border:none;color:var(--text);font-size:13px;text-align:left;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:8px" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12V5a1 1 0 011-1h3l2 2h5a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1z"/></svg>
+    Selecionar pasta ou arquivo
+  </button>
+  <button onclick="buscarTodosDrive()" style="width:100%;padding:9px 12px;background:transparent;border:none;color:var(--text);font-size:13px;text-align:left;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:8px" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="4"/><path d="M10.5 10.5L14 14"/></svg>
+    Buscar todos os STLs no Drive
+  </button>
+</div>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 17 17" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 13L8.5 3 15 13Z"/><path d="M5.5 13L8.5 8 11.5 13"/></svg>
+    </div>
+    <span class="logo-name">Galeria STL</span>
+    <span class="logo-count" id="total-count">0 modelos</span>
+  </div>
+  <div class="hright">
+    <div class="search-wrap">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="4"/><path d="M10.5 10.5L14 14"/></svg>
+      <input class="search-input" type="text" id="search" placeholder="Buscar modelos…">
+    </div>
+    <button class="btn-ghost" onclick="document.getElementById('folder-input').click()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12V5a1 1 0 011-1h3l2 2h5a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1z"/></svg>
+      Pasta local
+    </button>
+    <button class="btn-drive" id="drive-btn" onclick="abrirModalDrive()">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12.9L6.28 3H3.14L12 18.9l8.86-15.9h-3.14L12 12.9z"/></svg>
+      Google Drive
+    </button>
+    <button class="btn-primary" onclick="document.getElementById('file-input').click()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 10V3M5 6l3-3 3 3M3 12h10"/></svg>
+      Adicionar STLs
+    </button>
+    <button class="btn-ghost" id="home-btn" onclick="voltarInicio()" style="display:none">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6.5L8 2l6 4.5V14a1 1 0 01-1 1H3a1 1 0 01-1-1V6.5z"/><path d="M6 15V9h4v6"/></svg>
+      Início
+    </button>
+  </div>
+</header>
+
+<div class="toolbar">
+  <div class="chips">
+    <button class="chip active" data-filter="all">Todos</button>
+    <button class="chip ok" data-filter="ok">✓ Pode vender</button>
+    <button class="chip warn" data-filter="warn">⚠ Verificar</button>
+    <button class="chip bad" data-filter="bad">✕ Não comercial</button>
+    <button class="chip" data-filter="small">Pequenos</button>
+    <button class="chip" data-filter="large">Grandes</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:7px">
+    <span style="font-size:12px;color:var(--muted)">Ordenar</span>
+    <select class="sort-sel" id="sort-sel">
+      <option value="name">Nome A→Z</option>
+      <option value="namez">Nome Z→A</option>
+      <option value="size">Maior tamanho</option>
+      <option value="tris">Mais triângulos</option>
+    </select>
+  </div>
+</div>
+
+<div class="main">
+  <div class="empty-state" id="empty-state">
+    <div class="empty-icon"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 26L10 14l8 8 4-5 10 9Z"/><rect x="2" y="4" width="32" height="28" rx="4"/></svg></div>
+    <div class="empty-title">Nenhum modelo carregado</div>
+    <div class="empty-sub">Abra uma pasta do Google Drive, selecione arquivos locais ou arraste STLs para cá</div>
+    <div class="btn-row">
+      <button class="btn-drive" onclick="abrirModalDrive()">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 12.9L6.28 3H3.14L12 18.9l8.86-15.9h-3.14L12 12.9z"/></svg>
+        Abrir do Google Drive
+      </button>
+      <button class="btn-primary" onclick="document.getElementById('file-input').click()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 10V3M5 6l3-3 3 3M3 12h10"/></svg>
+        Arquivos locais
+      </button>
+    </div>
+    <div id="prog-wrap" style="display:none">
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+      <div class="prog-label" id="prog-label">Carregando...</div>
+    </div>
+  </div>
+  <div class="grid" id="grid" style="display:none"></div>
+  <div class="no-results" id="no-results" style="display:none">Nenhum modelo encontrado.</div>
+</div>
+
+<!-- Drive Link Modal -->
+<div class="overlay" id="drive-overlay" style="z-index:250">
+  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:16px;width:100%;max-width:500px;padding:28px;transform:scale(.95);transition:transform .2s" id="drive-modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div style="font-size:16px;font-weight:700">Abrir pasta do Google Drive</div>
+      <button onclick="fecharModalDrive()" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;width:28px;height:28px;display:flex;align-items:center;justify-content:center">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 1l12 12M13 1L1 13"/></svg>
+      </button>
+    </div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6">
+      Cole o link de uma pasta do Google Drive abaixo. A pasta precisa estar compartilhada como <strong style="color:var(--text)">"Qualquer pessoa com o link pode ver"</strong>.
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Como compartilhar a pasta:</div>
+    <div style="font-size:12px;color:var(--muted2);margin-bottom:16px;line-height:1.7;background:var(--surface2);padding:10px 12px;border-radius:8px">
+      1. No Google Drive, clique com botão direito na pasta<br>
+      2. Clique em <strong style="color:var(--text)">"Compartilhar"</strong><br>
+      3. Mude para <strong style="color:var(--text)">"Qualquer pessoa com o link"</strong><br>
+      4. Copie o link e cole aqui
+    </div>
+    <input type="text" id="drive-link-input" class="edit-input" placeholder="https://drive.google.com/drive/folders/..." style="margin-bottom:12px;font-size:13px">
+    <div id="drive-link-error" style="font-size:12px;color:var(--bad);margin-bottom:10px;display:none">Link inválido. Use um link de pasta do Google Drive.</div>
+    <button onclick="carregarPastaDrive()" class="btn-primary" style="width:100%;justify-content:center">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 10V3M5 6l3-3 3 3M3 12h10"/></svg>
+      Carregar STLs da pasta
+    </button>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-left">
+      <div id="mcanvas-wrap" style="flex:1;position:relative;cursor:grab"></div>
+      <div class="modal-hint">Arraste · Scroll = zoom · Shift+arraste = pan · ← → navegar</div>
+    </div>
+    <div class="modal-right">
+      <div class="mhead">
+        <div class="mtitle" id="m-title">—</div>
+        <button class="close-btn" id="close-btn"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 1l12 12M13 1L1 13"/></svg></button>
+      </div>
+      <div class="msec">
+        <div class="msec-title">Arquivo</div>
+        <div class="mrow"><span class="mlabel">Triângulos</span><span class="mval" id="m-tris">—</span></div>
+        <div class="mrow"><span class="mlabel">Tamanho</span><span class="mval" id="m-size">—</span></div>
+        <div class="mrow"><span class="mlabel">Dimensões (mm)</span><span class="mval" id="m-dims">—</span></div>
+        <div class="mrow"><span class="mlabel">Formato</span><span class="mval" id="m-fmt">—</span></div>
+        <div class="mrow"><span class="mlabel">Volume (est.)</span><span class="mval" id="m-vol">—</span></div>
+        <div class="mrow" id="m-source-row" style="display:none"><span class="mlabel">Fonte</span><span class="mval"><span style="font-size:10px;background:rgba(26,115,232,0.2);color:#60a5fa;padding:2px 6px;border-radius:4px;font-family:'DM Mono',monospace">Google Drive</span></span></div>
+      </div>
+      <div class="msec">
+        <div class="msec-title">Licença & Origem</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <span style="font-size:12px;color:var(--muted)">Status</span>
+          <span id="m-lic-badge">—</span>
+        </div>
+        <div class="edit-field">
+          <div class="edit-label">Plataforma</div>
+          <select class="edit-input" id="m-platform">
+            <option value="">Desconhecida</option>
+            <option value="Thingiverse">Thingiverse</option>
+            <option value="Cults3D">Cults3D</option>
+            <option value="Printables">Printables</option>
+            <option value="MakerWorld">MakerWorld</option>
+            <option value="MyMiniFactory">MyMiniFactory</option>
+            <option value="Thangs">Thangs</option>
+            <option value="GrabCAD">GrabCAD</option>
+            <option value="Próprio">Arquivo próprio</option>
+            <option value="Outro">Outro</option>
+          </select>
+        </div>
+        <div class="edit-field">
+          <div class="edit-label">Licença</div>
+          <select class="edit-input" id="m-license">
+            <option value="unknown">Não verificada</option>
+            <option value="cc0">CC0 — Domínio público (pode vender)</option>
+            <option value="cc-by">CC BY — Pode vender com crédito</option>
+            <option value="cc-by-sa">CC BY-SA — Pode vender (mesma licença)</option>
+            <option value="cc-by-nd">CC BY-ND — Pode vender (sem modificar)</option>
+            <option value="cc-by-nc">CC BY-NC — NÃO comercial</option>
+            <option value="cc-by-nc-sa">CC BY-NC-SA — NÃO comercial</option>
+            <option value="cc-by-nc-nd">CC BY-NC-ND — NÃO comercial</option>
+            <option value="proprietary">Proprietária — verificar termos</option>
+            <option value="own">Arquivo próprio — livre</option>
+          </select>
+        </div>
+        <div class="edit-field">
+          <div class="edit-label">Designer</div>
+          <input class="edit-input" type="text" id="m-designer" placeholder="Nome do designer…">
+        </div>
+        <div class="edit-field">
+          <div class="edit-label">URL de origem</div>
+          <input class="edit-input" type="text" id="m-url" placeholder="https://…">
+        </div>
+        <div class="edit-field">
+          <div class="edit-label">Notas</div>
+          <input class="edit-input" type="text" id="m-notes" placeholder="Observações…">
+        </div>
+      </div>
+      <div class="msec">
+        <div class="msec-title">Material</div>
+        <div style="margin-bottom:8px">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:5px">Cor</div>
+          <div class="swatch-row" id="m-colors">
+            <div class="swatch on" style="background:#d0ccc8" data-c="#d0ccc8"></div>
+            <div class="swatch" style="background:#7c6cfc" data-c="#7c6cfc"></div>
+            <div class="swatch" style="background:#f87171" data-c="#f87171"></div>
+            <div class="swatch" style="background:#60a5fa" data-c="#60a5fa"></div>
+            <div class="swatch" style="background:#4ade80" data-c="#4ade80"></div>
+            <div class="swatch" style="background:#fb923c" data-c="#fb923c"></div>
+            <div class="swatch" style="background:#e8ff47" data-c="#e8ff47"></div>
+            <div class="swatch" style="background:#ffffff" data-c="#ffffff"></div>
+          </div>
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-label">Metálico <span id="m-metal-v">30%</span></div>
+          <input type="range" id="m-metal" min="0" max="100" value="30">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-label">Rugosidade <span id="m-rough-v">50%</span></div>
+          <input type="range" id="m-rough" min="0" max="100" value="50">
+        </div>
+      </div>
+      <div class="msec">
+        <div class="msec-title">Câmera</div>
+        <div class="vbtns" style="margin-bottom:10px">
+          <button class="vbtn on" data-v="persp">Perspectiva</button>
+          <button class="vbtn" data-v="top">Topo</button>
+          <button class="vbtn" data-v="front">Frente</button>
+          <button class="vbtn" data-v="side">Lado</button>
+        </div>
+        <div class="tog-row"><span class="tog-label">Wireframe</span><label class="tog"><input type="checkbox" id="m-wire"><div class="tog-track"></div><div class="tog-thumb"></div></label></div>
+        <div class="tog-row"><span class="tog-label">Grade</span><label class="tog"><input type="checkbox" id="m-grid" checked><div class="tog-track"></div><div class="tog-thumb"></div></label></div>
+      </div>
+      <div class="nav-btns">
+        <button class="nav-btn" id="prev-btn"><svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 2L4 5.5 7 9"/></svg> Anterior</button>
+        <button class="nav-btn" id="next-btn">Próximo <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 2l3 3.5-3 3.5"/></svg></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="file-input" accept=".stl" multiple>
+<input type="file" id="folder-input" webkitdirectory multiple>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ─── Config ──────────────────────────────────────────────────────────────────
+const API_KEY = 'AIzaSyClX4FknVIejCvYQXtFHKQ4ty0UShuuXsc';
+
+function toast(msg, ms=3000){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), ms);
+}
+
+function abrirModalDrive(){
+  document.getElementById('drive-overlay').classList.add('open');
+  document.getElementById('drive-modal-box').style.transform='scale(1)';
+}
+
+function fecharModalDrive(){
+  document.getElementById('drive-overlay').classList.remove('open');
+  document.getElementById('drive-link-input').value='';
+  document.getElementById('drive-link-error').style.display='none';
+}
+
+function extrairFolderId(link){
+  // Formatos: /folders/ID, ?id=ID
+  const m1 = link.match(/\/folders\/([a-zA-Z0-9_-]+)/);
+  if(m1) return m1[1];
+  const m2 = link.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if(m2) return m2[1];
+  return null;
+}
+
+async function carregarPastaDrive(){
+  const link = document.getElementById('drive-link-input').value.trim();
+  const folderId = extrairFolderId(link);
+  if(!folderId){
+    document.getElementById('drive-link-error').style.display='block';
+    return;
+  }
+  document.getElementById('drive-link-error').style.display='none';
+  fecharModalDrive();
+  toast('📂 Buscando STLs na pasta...');
+  try{
+    const files = await listFolderSTLs(folderId);
+    if(!files.length){ toast('Nenhum arquivo STL encontrado na pasta.'); return; }
+    toast(`Encontrado ${files.length} arquivo(s) STL!`);
+    await loadDriveFiles(files);
+  }catch(e){
+    toast('Erro: verifique se a pasta está compartilhada publicamente.');
+    console.error(e);
+  }
+}
+
+async function listFolderSTLs(folderId){
+  const files=[];
+  try{
+    let pageToken='';
+    do{
+      const q=encodeURIComponent(`'${folderId}' in parents and trashed=false`);
+      const url=`https://www.googleapis.com/drive/v3/files?q=${q}&fields=nextPageToken,files(id,name,size,mimeType)&pageSize=200&key=${API_KEY}${pageToken?'&pageToken='+pageToken:''}`;
+      const r=await fetch(url);
+      const d=await r.json();
+      if(d.error){ throw new Error(d.error.message); }
+      for(const f of (d.files||[])){
+        if(f.name.toLowerCase().endsWith('.stl')) files.push({id:f.id,name:f.name,size:+f.size||0});
+        if(f.mimeType==='application/vnd.google-apps.folder'){
+          const sub=await listFolderSTLs(f.id);
+          files.push(...sub);
+        }
+      }
+      pageToken=d.nextPageToken||'';
+    }while(pageToken);
+  }catch(e){ console.warn('Erro na pasta',folderId,e); }
+  return files;
+}
+
+async function loadDriveFiles(driveFiles){
+  document.getElementById('empty-state').style.display='flex';
+  document.getElementById('grid').style.display='none';
+  document.getElementById('prog-wrap').style.display='block';
+  const pf=document.getElementById('prog-fill');
+  const pl=document.getElementById('prog-label');
+  for(let i=0;i<driveFiles.length;i++){
+    const df=driveFiles[i];
+    pl.textContent=`Baixando ${i+1}/${driveFiles.length}: ${df.name}`;
+    pf.style.width=((i+1)/driveFiles.length*100)+'%';
+    try{
+      const url=`https://www.googleapis.com/drive/v3/files/${df.id}?alt=media&key=${API_KEY}`;
+      const resp=await fetch(url);
+      if(!resp.ok){ console.warn('Erro ao baixar',df.name,resp.status); continue; }
+      const buf=await resp.arrayBuffer();
+      const fakeFile={name:df.name,size:df.size||buf.byteLength};
+      const m=await processFileBuffer(buf,fakeFile,true);
+      if(m && !models.find(x=>x.fileName===m.fileName)) models.push(m);
+    }catch(e){console.warn('Erro ao carregar',df.name,e);}
+  }
+  document.getElementById('prog-wrap').style.display='none';
+  applyAndRender();
+  toast(`✓ ${driveFiles.length} arquivo(s) carregado(s) do Drive!`);
+}
+
+// ─── License detection ────────────────────────────────────────────────────────
+const LICENSE_DB=[
+  {rx:/thing[-_]?\d+/i,platform:'Thingiverse',license:'unknown'},
+  {rx:/thingiverse/i,platform:'Thingiverse',license:'unknown'},
+  {rx:/cults/i,platform:'Cults3D',license:'unknown'},
+  {rx:/printables/i,platform:'Printables',license:'cc-by'},
+  {rx:/makerworld/i,platform:'MakerWorld',license:'unknown'},
+  {rx:/mmf[-_]/i,platform:'MyMiniFactory',license:'unknown'},
+  {rx:/grabcad/i,platform:'GrabCAD',license:'proprietary'},
+  {rx:/thangs/i,platform:'Thangs',license:'unknown'},
+  {rx:/cc0/i,platform:'',license:'cc0'},
+  {rx:/cc[-_]by[-_]nc[-_]nd/i,platform:'',license:'cc-by-nc-nd'},
+  {rx:/cc[-_]by[-_]nc[-_]sa/i,platform:'',license:'cc-by-nc-sa'},
+  {rx:/cc[-_]by[-_]nc/i,platform:'',license:'cc-by-nc'},
+  {rx:/cc[-_]by[-_]sa/i,platform:'',license:'cc-by-sa'},
+  {rx:/cc[-_]by[-_]nd/i,platform:'',license:'cc-by-nd'},
+  {rx:/cc[-_]by/i,platform:'',license:'cc-by'},
+];
+const LICENSE_INFO={
+  'cc0':{label:'CC0',status:'ok',text:'Domínio público'},
+  'cc-by':{label:'CC BY',status:'ok',text:'Pode vender com crédito'},
+  'cc-by-sa':{label:'CC BY-SA',status:'ok',text:'Pode vender'},
+  'cc-by-nd':{label:'CC BY-ND',status:'ok',text:'Pode vender'},
+  'cc-by-nc':{label:'CC BY-NC',status:'bad',text:'Não comercial'},
+  'cc-by-nc-sa':{label:'CC BY-NC-SA',status:'bad',text:'Não comercial'},
+  'cc-by-nc-nd':{label:'CC BY-NC-ND',status:'bad',text:'Não comercial'},
+  'proprietary':{label:'Proprietária',status:'warn',text:'Verificar termos'},
+  'own':{label:'Próprio',status:'ok',text:'Livre'},
+  'unknown':{label:'?',status:'warn',text:'Não verificada'},
+};
+function detectLicense(name){
+  for(const p of LICENSE_DB){ if(p.rx.test(name)) return{platform:p.platform,license:p.license}; }
+  return{platform:'',license:'unknown'};
+}
+function licBadgeHTML(licKey){
+  const info=LICENSE_INFO[licKey]||LICENSE_INFO['unknown'];
+  const cls=info.status==='ok'?'lic-ok':info.status==='bad'?'lic-bad':'lic-warn';
+  const icon=info.status==='ok'?'✓':info.status==='bad'?'✕':'⚠';
+  return`<span class="lic-badge ${cls}">${icon} ${info.label}</span>`;
+}
+
+// ─── STL parsing ──────────────────────────────────────────────────────────────
+function formatBytes(b){if(b<1024)return b+'B';if(b<1048576)return(b/1024).toFixed(1)+'KB';return(b/1048576).toFixed(2)+'MB';}
+function detectBinary(buf){if(buf.byteLength<84)return false;const v=new DataView(buf);const n=v.getUint32(80,true);return buf.byteLength===84+n*50;}
+function parseSTL(buf){
+  const geo=new THREE.BufferGeometry();
+  const isBin=detectBinary(buf);
+  if(isBin){
+    const v=new DataView(buf);const n=v.getUint32(80,true);
+    const pos=new Float32Array(n*9),nrm=new Float32Array(n*9);
+    let o=84;
+    for(let i=0;i<n;i++){
+      const nx=v.getFloat32(o,true);o+=4;const ny=v.getFloat32(o,true);o+=4;const nz=v.getFloat32(o,true);o+=4;
+      for(let j=0;j<3;j++){pos[i*9+j*3]=v.getFloat32(o,true);o+=4;pos[i*9+j*3+1]=v.getFloat32(o,true);o+=4;pos[i*9+j*3+2]=v.getFloat32(o,true);o+=4;nrm[i*9+j*3]=nx;nrm[i*9+j*3+1]=ny;nrm[i*9+j*3+2]=nz;}
+      o+=2;
+    }
+    geo.setAttribute('position',new THREE.BufferAttribute(pos,3));geo.setAttribute('normal',new THREE.BufferAttribute(nrm,3));
+    geo._isBinary=true;geo._tris=n;
+  }else{
+    const txt=new TextDecoder().decode(buf);const verts=[],norms=[];let cn=[0,0,1];
+    for(const l of txt.split('\n')){const t=l.trim();if(t.startsWith('facet normal')){const p=t.split(/\s+/);cn=[+p[2],+p[3],+p[4]];}else if(t.startsWith('vertex')){const p=t.split(/\s+/);verts.push(+p[1],+p[2],+p[3]);norms.push(...cn);}}
+    geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(verts),3));geo.setAttribute('normal',new THREE.BufferAttribute(new Float32Array(norms),3));
+    geo._isBinary=false;geo._tris=verts.length/3;
+  }
+  return geo;
+}
+function centerAndScale(geo){
+  geo.computeBoundingBox();const bb=geo.boundingBox;
+  const ctr=new THREE.Vector3();bb.getCenter(ctr);
+  const sz=new THREE.Vector3();bb.getSize(sz);
+  const maxD=Math.max(sz.x,sz.y,sz.z)||1;const s=2.5/maxD;
+  geo.translate(-ctr.x,-ctr.y,-ctr.z);geo.scale(s,s,s);
+  geo._origSize=sz;geo._scale=s;return geo;
+}
+function estimateVolume(geo){
+  const pos=geo.attributes.position;let vol=0;
+  for(let i=0;i<pos.count;i+=3){
+    const ax=pos.getX(i),ay=pos.getY(i),az=pos.getZ(i);
+    const bx=pos.getX(i+1),by=pos.getY(i+1),bz=pos.getZ(i+1);
+    const cx=pos.getX(i+2),cy=pos.getY(i+2),cz=pos.getZ(i+2);
+    vol+=ax*(by*cz-bz*cy)+bx*(cy*az-cz*ay)+cx*(ay*bz-az*by);
+  }
+  return Math.abs(vol/6);
+}
+
+// ─── Thumbnail ────────────────────────────────────────────────────────────────
+let thumbR=null;
+function getThumbR(){
+  if(!thumbR){thumbR=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});thumbR.setPixelRatio(1);thumbR.setSize(300,200);thumbR.toneMapping=THREE.ACESFilmicToneMapping;thumbR.toneMappingExposure=1.1;thumbR.outputEncoding=THREE.sRGBEncoding;}
+  return thumbR;
+}
+function renderThumb(geo,color){
+  const r=getThumbR();const sc=new THREE.Scene();sc.background=new THREE.Color('#1c1c26');
+  const cam=new THREE.PerspectiveCamera(40,300/200,0.01,1000);cam.position.set(0,0,5);
+  sc.add(new THREE.AmbientLight(0xffffff,0.5));
+  const k=new THREE.DirectionalLight(0xffffff,1.2);k.position.set(5,8,5);sc.add(k);
+  const f=new THREE.DirectionalLight(0xaabbff,0.4);f.position.set(-4,2,-4);sc.add(f);
+  const mat=new THREE.MeshStandardMaterial({color:new THREE.Color(color),metalness:0.2,roughness:0.6,side:THREE.DoubleSide});
+  const m=new THREE.Mesh(geo,mat);m.rotation.x=Math.PI/10;m.rotation.y=Math.PI/5;sc.add(m);
+  sc.add(new THREE.GridHelper(8,16,0x222230,0x18181f));
+  r.render(sc,cam);return r.domElement.toDataURL('image/png');
+}
+
+// ─── Process files ────────────────────────────────────────────────────────────
+const models=[];let filteredModels=[];
+let activeFilter='all',searchVal='',sortVal='name';
+
+async function processFileBuffer(buf, fileInfo, fromDrive=false){
+  try{
+    const geo=parseSTL(buf);
+    geo.computeVertexNormals();centerAndScale(geo);
+    const sz=geo._origSize||new THREE.Vector3();const inv=1/(geo._scale||1);
+    const vol=estimateVolume(geo);const volMM3=vol/(geo._scale**3);
+    const detected=detectLicense(fileInfo.name.replace(/\.stl$/i,''));
+    const model={
+      name:fileInfo.name.replace(/\.stl$/i,''),fileName:fileInfo.name,
+      size:fileInfo.size,tris:geo._tris||0,binary:geo._isBinary,geo,
+      dims:`${(sz.x*inv).toFixed(1)}×${(sz.y*inv).toFixed(1)}×${(sz.z*inv).toFixed(1)}`,
+      volMM3,color:'#d0ccc8',
+      platform:detected.platform,license:detected.license,
+      designer:'',url:'',notes:'',
+      fromDrive,thumb:null,
+    };
+    model.thumb=renderThumb(geo,'#d0ccc8');
+    return model;
+  }catch(e){return null;}
+}
+
+async function loadFiles(files){
+  const stls=[...files].filter(f=>f.name.toLowerCase().endsWith('.stl'));
+  if(!stls.length) return;
+  document.getElementById('empty-state').style.display='flex';
+  document.getElementById('grid').style.display='none';
+  document.getElementById('prog-wrap').style.display='block';
+  const pf=document.getElementById('prog-fill');const pl=document.getElementById('prog-label');
+  for(let i=0;i<stls.length;i++){
+    pl.textContent=`Carregando ${i+1}/${stls.length}: ${stls[i].name}`;
+    pf.style.width=((i+1)/stls.length*100)+'%';
+    const buf=await stls[i].arrayBuffer();
+    const m=await processFileBuffer(buf,stls[i],false);
+    if(m&&!models.find(x=>x.fileName===m.fileName)) models.push(m);
+  }
+  document.getElementById('prog-wrap').style.display='none';
+  applyAndRender();
+  if(models.length>0) document.getElementById('home-btn').style.display='flex';
+}
+
+function applyAndRender(){
+  let list=[...models];
+  if(searchVal) list=list.filter(m=>m.name.toLowerCase().includes(searchVal.toLowerCase())||m.designer.toLowerCase().includes(searchVal.toLowerCase()));
+  if(activeFilter==='ok') list=list.filter(m=>(LICENSE_INFO[m.license]||{status:'warn'}).status==='ok');
+  else if(activeFilter==='warn') list=list.filter(m=>(LICENSE_INFO[m.license]||{status:'warn'}).status==='warn');
+  else if(activeFilter==='bad') list=list.filter(m=>(LICENSE_INFO[m.license]||{status:'warn'}).status==='bad');
+  else if(activeFilter==='small') list=list.filter(m=>m.size<1048576);
+  else if(activeFilter==='large') list=list.filter(m=>m.size>=10485760);
+  if(sortVal==='name') list.sort((a,b)=>a.name.localeCompare(b.name));
+  else if(sortVal==='namez') list.sort((a,b)=>b.name.localeCompare(a.name));
+  else if(sortVal==='size') list.sort((a,b)=>b.size-a.size);
+  else if(sortVal==='tris') list.sort((a,b)=>b.tris-a.tris);
+  filteredModels=list;renderGrid();
+}
+
+function renderGrid(){
+  const grid=document.getElementById('grid');const empty=document.getElementById('empty-state');const noRes=document.getElementById('no-results');
+  document.getElementById('total-count').textContent=models.length+' modelo'+(models.length!==1?'s':'');
+  if(!models.length){empty.style.display='flex';grid.style.display='none';noRes.style.display='none';return;}
+  empty.style.display='none';
+  if(!filteredModels.length){grid.style.display='none';noRes.style.display='block';return;}
+  noRes.style.display='none';grid.style.display='grid';grid.innerHTML='';
+  filteredModels.forEach((m,i)=>{
+    const card=document.createElement('div');card.className='card';
+    card.innerHTML=`
+      <div class="card-thumb">
+        <img src="${m.thumb}" alt="${m.name}">
+        <div class="card-fmt">${m.binary?'BIN':'ASCII'}</div>
+        ${m.fromDrive?'<div class="card-src">Drive</div>':''}
+        <div class="card-lic">${licBadgeHTML(m.license)}</div>
+      </div>
+      <div class="card-body">
+        <div class="card-name" title="${m.name}">${m.name}</div>
+        <div class="card-meta"><span>${formatBytes(m.size)}</span><span>${m.tris.toLocaleString('pt-BR')} tri</span></div>
+        ${m.platform?`<div class="card-platform">${m.platform}${m.designer?' · '+m.designer:''}</div>`:''}
+      </div>`;
+    card.addEventListener('click',()=>openModal(i));
+    grid.appendChild(card);
+  });
+}
+
+// ─── Modal ────────────────────────────────────────────────────────────────────
+let mR,mSc,mCam,mMesh,mGrid2;
+let mRot={x:Math.PI/8,y:Math.PI/4},mPan={x:0,y:0},mZoom=1;
+let mDown=false,mLast={x:0,y:0},mShift=false,mRAF=null,mOpenIdx=-1;
+
+function initModal(){
+  const wrap=document.getElementById('mcanvas-wrap');
+  mR=new THREE.WebGLRenderer({antialias:true,alpha:true});
+  mR.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  mR.toneMapping=THREE.ACESFilmicToneMapping;mR.toneMappingExposure=1.1;mR.outputEncoding=THREE.sRGBEncoding;
+  wrap.appendChild(mR.domElement);
+  mSc=new THREE.Scene();mSc.background=new THREE.Color('#0c0c0f');
+  mCam=new THREE.PerspectiveCamera(45,1,0.01,10000);mCam.position.set(0,0,5);
+  mSc.add(new THREE.AmbientLight(0xffffff,0.4));
+  const k=new THREE.DirectionalLight(0xffffff,1.3);k.position.set(5,10,5);mSc.add(k);
+  const f=new THREE.DirectionalLight(0xaabbff,0.5);f.position.set(-5,2,-5);mSc.add(f);
+  mGrid2=new THREE.GridHelper(10,20,0x222230,0x1a1a26);mSc.add(mGrid2);
+  setupMEvents(wrap);
+}
+function resizeModal(){const wrap=document.getElementById('mcanvas-wrap');const w=wrap.clientWidth,h=wrap.clientHeight;if(!w||!h)return;mR.setSize(w,h);mCam.aspect=w/h;mCam.updateProjectionMatrix();}
+function animateModal(){mRAF=requestAnimationFrame(animateModal);if(mMesh){mMesh.rotation.x=mRot.x;mMesh.rotation.y=mRot.y;mMesh.position.x=mPan.x;mMesh.position.y=mPan.y;mCam.position.z=5/mZoom;}mR.render(mSc,mCam);}
+function setupMEvents(wrap){
+  wrap.addEventListener('mousedown',e=>{mDown=true;mLast={x:e.clientX,y:e.clientY};});
+  window.addEventListener('mousemove',e=>{if(!mDown||!mMesh)return;const dx=e.clientX-mLast.x,dy=e.clientY-mLast.y;mLast={x:e.clientX,y:e.clientY};if(mShift){mPan.x+=dx*.005;mPan.y-=dy*.005;}else{mRot.y+=dx*.008;mRot.x+=dy*.008;}});
+  window.addEventListener('mouseup',()=>mDown=false);
+  window.addEventListener('keydown',e=>{
+    if(e.key==='Shift')mShift=true;
+    if(e.key==='ArrowLeft'&&mOpenIdx>0)openModal(mOpenIdx-1);
+    if(e.key==='ArrowRight'&&mOpenIdx<filteredModels.length-1)openModal(mOpenIdx+1);
+  });
+  window.addEventListener('keyup',e=>{if(e.key==='Shift')mShift=false;});
+  wrap.addEventListener('wheel',e=>{e.preventDefault();mZoom*=(1-e.deltaY*.001);mZoom=Math.max(.05,Math.min(50,mZoom));},{passive:false});
+}
+
+function openModal(idx){
+  const m=filteredModels[idx];if(!m)return;
+  mOpenIdx=idx;
+  document.getElementById('overlay').classList.add('open');
+  if(!mR)initModal();
+  setTimeout(()=>{resizeModal();loadInModal(m);},50);
+  if(mRAF)cancelAnimationFrame(mRAF);
+  animateModal();
+  document.querySelectorAll('.card').forEach((c,i)=>c.classList.toggle('selected',i===idx));
+}
+
+function loadInModal(m){
+  if(mMesh){mSc.remove(mMesh);mMesh=null;}
+  const geo=m.geo.clone();
+  const mat=new THREE.MeshStandardMaterial({color:new THREE.Color(m.color),metalness:+document.getElementById('m-metal').value/100,roughness:+document.getElementById('m-rough').value/100,side:THREE.DoubleSide,wireframe:document.getElementById('m-wire').checked});
+  mMesh=new THREE.Mesh(geo,mat);mSc.add(mMesh);
+  mRot={x:Math.PI/8,y:Math.PI/4};mPan={x:0,y:0};mZoom=1;
+  document.getElementById('m-title').textContent=m.name;
+  document.getElementById('m-tris').textContent=m.tris.toLocaleString('pt-BR');
+  document.getElementById('m-size').textContent=formatBytes(m.size);
+  document.getElementById('m-dims').textContent=m.dims+' mm';
+  document.getElementById('m-fmt').textContent=m.binary?'STL binário':'STL ASCII';
+  document.getElementById('m-vol').textContent=(m.volMM3/1000).toFixed(2)+' cm³ (est.)';
+  document.getElementById('m-source-row').style.display=m.fromDrive?'flex':'none';
+  document.getElementById('m-platform').value=m.platform||'';
+  document.getElementById('m-license').value=m.license||'unknown';
+  document.getElementById('m-designer').value=m.designer||'';
+  document.getElementById('m-url').value=m.url||'';
+  document.getElementById('m-notes').value=m.notes||'';
+  updateLicBadge(m.license);
+  document.getElementById('prev-btn').disabled=mOpenIdx===0;
+  document.getElementById('next-btn').disabled=mOpenIdx===filteredModels.length-1;
+  document.querySelectorAll('#m-colors .swatch').forEach(s=>s.classList.toggle('on',s.dataset.c===m.color));
+}
+
+function updateLicBadge(k){document.getElementById('m-lic-badge').innerHTML=licBadgeHTML(k);}
+
+function saveCurrentLicense(){
+  const m=filteredModels[mOpenIdx];if(!m)return;
+  m.platform=document.getElementById('m-platform').value;
+  m.license=document.getElementById('m-license').value;
+  m.designer=document.getElementById('m-designer').value;
+  m.url=document.getElementById('m-url').value;
+  m.notes=document.getElementById('m-notes').value;
+  updateLicBadge(m.license);renderGrid();
+}
+['m-platform','m-license','m-designer','m-url','m-notes'].forEach(id=>{
+  document.getElementById(id).addEventListener('change',saveCurrentLicense);
+  document.getElementById(id).addEventListener('input',saveCurrentLicense);
+});
+
+function closeModal(){
+  document.getElementById('overlay').classList.remove('open');
+  if(mRAF){cancelAnimationFrame(mRAF);mRAF=null;}
+  if(mMesh){mSc.remove(mMesh);mMesh=null;}
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('selected'));
+}
+document.getElementById('close-btn').addEventListener('click',closeModal);
+document.getElementById('overlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+document.getElementById('prev-btn').addEventListener('click',()=>{if(mOpenIdx>0)openModal(mOpenIdx-1);});
+document.getElementById('next-btn').addEventListener('click',()=>{if(mOpenIdx<filteredModels.length-1)openModal(mOpenIdx+1);});
+document.getElementById('m-metal').addEventListener('input',function(){document.getElementById('m-metal-v').textContent=this.value+'%';if(mMesh)mMesh.material.metalness=this.value/100;});
+document.getElementById('m-rough').addEventListener('input',function(){document.getElementById('m-rough-v').textContent=this.value+'%';if(mMesh)mMesh.material.roughness=this.value/100;});
+document.getElementById('m-wire').addEventListener('change',function(){if(mMesh)mMesh.material.wireframe=this.checked;});
+document.getElementById('m-grid').addEventListener('change',function(){if(mGrid2)mGrid2.visible=this.checked;});
+document.querySelectorAll('#m-colors .swatch').forEach(sw=>{sw.addEventListener('click',function(){document.querySelectorAll('#m-colors .swatch').forEach(s=>s.classList.remove('on'));this.classList.add('on');const m=filteredModels[mOpenIdx];if(m)m.color=this.dataset.c;if(mMesh)mMesh.material.color.set(this.dataset.c);});});
+document.querySelectorAll('.vbtn').forEach(btn=>{btn.addEventListener('click',function(){document.querySelectorAll('.vbtn').forEach(b=>b.classList.remove('on'));this.classList.add('on');const v=this.dataset.v;if(v==='top'){mRot.x=-Math.PI/2;mRot.y=0;}else if(v==='front'){mRot.x=0;mRot.y=0;}else if(v==='side'){mRot.x=0;mRot.y=Math.PI/2;}else{mRot.x=Math.PI/8;mRot.y=Math.PI/4;}mPan={x:0,y:0};mZoom=1;});});
+
+// ─── Local file inputs & drag ─────────────────────────────────────────────────
+document.getElementById('file-input').addEventListener('change',e=>loadFiles(e.target.files));
+document.getElementById('folder-input').addEventListener('change',e=>loadFiles(e.target.files));
+let dragCount=0;
+document.addEventListener('dragenter',()=>{dragCount++;document.getElementById('drag-full').classList.add('show');});
+document.addEventListener('dragleave',()=>{dragCount--;if(dragCount===0)document.getElementById('drag-full').classList.remove('show');});
+document.addEventListener('dragover',e=>e.preventDefault());
+document.addEventListener('drop',e=>{e.preventDefault();dragCount=0;document.getElementById('drag-full').classList.remove('show');loadFiles(e.dataTransfer.files);});
+document.getElementById('search').addEventListener('input',function(){searchVal=this.value;applyAndRender();});
+document.querySelectorAll('.chip').forEach(c=>{c.addEventListener('click',function(){document.querySelectorAll('.chip').forEach(ch=>ch.classList.remove('active'));this.classList.add('active');activeFilter=this.dataset.filter;applyAndRender();});});
+document.getElementById('sort-sel').addEventListener('change',function(){sortVal=this.value;applyAndRender();});
+function voltarInicio(){
+  if(confirm('Voltar ao início? Os modelos carregados serão removidos.')) {
+    models.length=0;
+    filteredModels.length=0;
+    document.getElementById('grid').style.display='none';
+    document.getElementById('empty-state').style.display='flex';
+    document.getElementById('no-results').style.display='none';
+    document.getElementById('total-count').textContent='0 modelos';
+    document.getElementById('home-btn').style.display='none';
+    closeModal();
+  }
+}
+window.addEventListener('resize',()=>{if(mR&&document.getElementById('overlay').classList.contains('open'))resizeModal();});
+</script>
+</body>
+</html>
