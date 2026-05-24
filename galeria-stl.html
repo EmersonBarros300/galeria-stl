@@ -427,11 +427,17 @@ function fecharModalDrive(){
 }
 
 function extrairFolderId(link){
-  // Formatos: /folders/ID, ?id=ID
-  const m1 = link.match(/\/folders\/([a-zA-Z0-9_-]+)/);
+  // Formato: /folders/ID
+  const m1 = link.match(/folders\/([a-zA-Z0-9_-]+)/);
   if(m1) return m1[1];
+  // Formato: ?id=ID
   const m2 = link.match(/[?&]id=([a-zA-Z0-9_-]+)/);
   if(m2) return m2[1];
+  // Formato: /d/ID
+  const m3 = link.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if(m3) return m3[1];
+  // Se for apenas o ID direto
+  if(/^[a-zA-Z0-9_-]{10,}$/.test(link.trim())) return link.trim();
   return null;
 }
 
